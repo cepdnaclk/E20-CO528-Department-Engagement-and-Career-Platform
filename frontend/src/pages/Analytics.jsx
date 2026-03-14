@@ -41,7 +41,7 @@ export default function Analytics() {
 
   if (loading) return <div className="loading-spinner" />;
 
-  const COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#10b981'];
+  const COLORS = ['#0a66c2', '#378fe9', '#004182', '#57a8f5', '#10b981'];
 
   const pieData = overview ? [
     { name: 'Students', value: overview.userBreakdown.students },
@@ -50,8 +50,8 @@ export default function Analytics() {
   ] : [];
 
   const statCards = overview ? [
-    { icon: Users, label: 'Total Users', value: overview.totalUsers, color: '#6366f1', bg: 'rgba(99,102,241,0.1)' },
-    { icon: FileText, label: 'Total Posts', value: overview.totalPosts, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+    { icon: Users, label: 'Total Users', value: overview.totalUsers, color: '#0a66c2', bg: 'rgba(10,102,194,0.12)' },
+    { icon: FileText, label: 'Total Posts', value: overview.totalPosts, color: '#378fe9', bg: 'rgba(55,143,233,0.12)' },
     { icon: Briefcase, label: 'Job Listings', value: overview.totalJobs, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
     { icon: Calendar, label: 'Events', value: overview.totalEvents, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
     { icon: TrendingUp, label: 'Research Projects', value: overview.totalProjects, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' }
@@ -86,7 +86,7 @@ export default function Analytics() {
               <Pie data={pieData} cx="50%" cy="50%" outerRadius={100} innerRadius={60} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
                 {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#f1f5f9' }} />
+              <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #d8dfe6', borderRadius: '8px', color: '#1d2226' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -96,12 +96,12 @@ export default function Analytics() {
           <h3>Top Posts by Engagement</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={postStats.slice(0, 8)}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="author" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} />
-              <Tooltip contentStyle={{ background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#f1f5f9' }} />
-              <Bar dataKey="likes" fill="#6366f1" radius={[4, 4, 0, 0]} name="Likes" />
-              <Bar dataKey="comments" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Comments" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(82, 90, 97, 0.15)" />
+              <XAxis dataKey="author" tick={{ fill: '#6f7780', fontSize: 12 }} />
+              <YAxis tick={{ fill: '#6f7780', fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #d8dfe6', borderRadius: '8px', color: '#1d2226' }} />
+              <Bar dataKey="likes" fill="#0a66c2" radius={[4, 4, 0, 0]} name="Likes" />
+              <Bar dataKey="comments" fill="#378fe9" radius={[4, 4, 0, 0]} name="Comments" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -111,10 +111,10 @@ export default function Analytics() {
           <h3>Job Applications</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={jobStats.slice(0, 8)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-              <YAxis dataKey="title" type="category" tick={{ fill: '#94a3b8', fontSize: 11 }} width={120} />
-              <Tooltip contentStyle={{ background: '#1f2937', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#f1f5f9' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(82, 90, 97, 0.15)" />
+              <XAxis type="number" tick={{ fill: '#6f7780', fontSize: 12 }} />
+              <YAxis dataKey="title" type="category" tick={{ fill: '#6f7780', fontSize: 11 }} width={120} />
+              <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #d8dfe6', borderRadius: '8px', color: '#1d2226' }} />
               <Bar dataKey="applications" fill="#10b981" radius={[0, 4, 4, 0]} name="Applications" />
             </BarChart>
           </ResponsiveContainer>
