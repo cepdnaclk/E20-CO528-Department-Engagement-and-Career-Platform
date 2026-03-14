@@ -103,7 +103,7 @@ table {
   margin-bottom: 2rem;
   font-size: 0.9em;
   font-family: sans-serif;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 20px rgba(169, 167, 167, 0.15);
   overflow: hidden;
   border-radius: 5px 5px 0 0;
 }
