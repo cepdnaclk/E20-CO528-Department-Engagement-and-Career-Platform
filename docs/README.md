@@ -128,7 +128,7 @@ table tbody tr:last-of-type {
 }
 @media (prefers-color-scheme: dark) {
   table { box-shadow: 0 0 20px rgba(173, 164, 164, 0.05); }
-  table tbody tr:nth-of-type(even) { background-color: #2a2a2a; }
+  table tbody tr:nth-of-type(even) { background-color: #d1d1d1ff; }
   table tbody tr { border-bottom: 1px solid #444444; }
 }
 </style>
