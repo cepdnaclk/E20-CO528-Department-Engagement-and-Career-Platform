@@ -94,5 +94,43 @@ The application uses a **Microservices Architecture** with three client layers:
 - [Department of Computer Engineering](http://www.ce.pdn.ac.lk/)
 - [University of Peradeniya](https://eng.pdn.ac.lk/)
 
+<style>
+/* Custom Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  font-size: 0.9em;
+  font-family: sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  border-radius: 5px 5px 0 0;
+}
+table thead {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+table th,
+table td {
+  padding: 12px 15px;
+}
+table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+@media (prefers-color-scheme: dark) {
+  table { box-shadow: 0 0 20px rgba(255, 255, 255, 0.05); }
+  table tbody tr:nth-of-type(even) { background-color: #2a2a2a; }
+  table tbody tr { border-bottom: 1px solid #444444; }
+}
+</style>
+
 [//]: # (Please refer this to learn more about Markdown syntax)
 [//]: # (https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
