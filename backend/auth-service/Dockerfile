@@ -2,7 +2,7 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 COPY shared ./shared
 COPY auth-service ./auth-service

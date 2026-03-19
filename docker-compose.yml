@@ -1,0 +1,110 @@
+services:
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: ./api-gateway/Dockerfile
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:5001
+      FEED_SERVICE_URL: http://feed-service:5002
+      JOBS_SERVICE_URL: http://jobs-service:5003
+      EVENTS_SERVICE_URL: http://events-service:5004
+      RESEARCH_SERVICE_URL: http://research-service:5005
+      MESSAGING_SERVICE_URL: http://messaging-service:5006
+      NOTIFICATIONS_SERVICE_URL: http://notifications-service:5007
+      ANALYTICS_SERVICE_URL: http://analytics-service:5008
+    depends_on:
+      - auth-service
+      - feed-service
+      - jobs-service
+      - events-service
+      - research-service
+      - messaging-service
+      - notifications-service
+      - analytics-service
+    ports:
+      - "5000:5000"
+
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: ./auth-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+      JWT_SECRET: decp_jwt_secret_key_2025
+      JWT_REFRESH_SECRET: decp_jwt_refresh_secret_key_2025
+    expose:
+      - "5001"
+
+  feed-service:
+    build:
+      context: ./backend
+      dockerfile: ./feed-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5002"
+
+  jobs-service:
+    build:
+      context: ./backend
+      dockerfile: ./jobs-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5003"
+
+  events-service:
+    build:
+      context: ./backend
+      dockerfile: ./events-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5004"
+
+  research-service:
+    build:
+      context: ./backend
+      dockerfile: ./research-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5005"
+
+  messaging-service:
+    build:
+      context: ./backend
+      dockerfile: ./messaging-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5006"
+
+  notifications-service:
+    build:
+      context: ./backend
+      dockerfile: ./notifications-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5007"
+
+  analytics-service:
+    build:
+      context: ./backend
+      dockerfile: ./analytics-service/Dockerfile
+    environment:
+      MONGODB_URI: mongodb+srv://Vescueye:zima48WBUcTGprRv@cluster0.unvh71d.mongodb.net/?appName=Cluster0
+    expose:
+      - "5008"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    environment:
+      API_BASE_URL: http://localhost:5000/api
+    depends_on:
+      - api-gateway
+    ports:
+      - "8080:80"
