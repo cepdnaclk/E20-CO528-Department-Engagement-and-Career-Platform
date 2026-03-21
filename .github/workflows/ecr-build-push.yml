@@ -1,0 +1,86 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api-gateway
+            context: backend/api-gateway
+            dockerfile: backend/api-gateway/Dockerfile
+            repository: api-gateway
+          - name: auth-service
+            context: backend/auth-service
+            dockerfile: backend/auth-service/Dockerfile
+            repository: auth-service
+          - name: feed-service
+            context: backend/feed-service
+            dockerfile: backend/feed-service/Dockerfile
+            repository: feed-service
+          - name: jobs-service
+            context: backend/jobs-service
+            dockerfile: backend/jobs-service/Dockerfile
+            repository: jobs-service
+          - name: events-service
+            context: backend/events-service
+            dockerfile: backend/events-service/Dockerfile
+            repository: events-service
+          - name: research-service
+            context: backend/research-service
+            dockerfile: backend/research-service/Dockerfile
+            repository: research-service
+          - name: messaging-service
+            context: backend/messaging-service
+            dockerfile: backend/messaging-service/Dockerfile
+            repository: messaging-service
+          - name: notifications-service
+            context: backend/notifications-service
+            dockerfile: backend/notifications-service/Dockerfile
+            repository: notifications-service
+          - name: analytics-service
+            context: backend/analytics-service
+            dockerfile: backend/analytics-service/Dockerfile
+            repository: analytics-service
+          - name: frontend
+            context: frontend
+            dockerfile: frontend/Dockerfile
+            repository: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ matrix.repository }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ matrix.repository }}:latest
