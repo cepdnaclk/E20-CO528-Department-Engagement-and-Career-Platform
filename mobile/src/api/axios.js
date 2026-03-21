@@ -3,7 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Use the machine's local IP address so physical devices running Expo Go can connect.
 // If your IP changes, you will need to update this!
-const API_URL = 'http://172.20.10.4:5000/api';
+// const API_URL = 'http://172.20.10.4:5000/api';
+const API_URL = 'https://www.decp.work.gd/api';
 
 const api = axios.create({ baseURL: API_URL });
 

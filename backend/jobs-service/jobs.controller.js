@@ -55,7 +55,7 @@ exports.applyForJob = async (req, res) => {
     job.applications.push({
       applicant: req.user._id,
       coverLetter: req.body.coverLetter || '',
-      resume: req.body.resume || ''
+      resume: req.file ? `/uploads/${req.file.filename}` : (req.body.resume || '')
     });
     await job.save();
 

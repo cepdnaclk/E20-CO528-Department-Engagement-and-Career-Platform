@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { Briefcase, MapPin, Clock, DollarSign, Plus, X, Send, Building } from 'lucide-react';
+import { Briefcase, MapPin, Clock, DollarSign, Plus, X, Send, Building, Users, FileText, Trash2 } from 'lucide-react';
+
+const API_BASE_URL = (typeof window !== 'undefined' && window.__ENV__?.API_BASE_URL)
+  ? window.__ENV__.API_BASE_URL.replace('/api', '')
+  : (import.meta.env.VITE_API_BASE_URL || '/api').replace('/api', '');
 
 export default function Jobs() {
   const { user } = useAuth();
@@ -11,8 +15,11 @@ export default function Jobs() {
   const [showModal, setShowModal] = useState(false);
   const [showApply, setShowApply] = useState(null);
   const [coverLetter, setCoverLetter] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
   const [form, setForm] = useState({ title: '', company: '', description: '', requirements: '', location: '', type: 'job', salary: '', deadline: '' });
   const [myApps, setMyApps] = useState([]);
+  const [showApplicants, setShowApplicants] = useState(null); // { jobTitle, applications[] }
+  const [applicantsLoading, setApplicantsLoading] = useState(false);
 
   useEffect(() => { fetchJobs(); if (user?.role === 'student') fetchMyApps(); }, []);
 
@@ -37,12 +44,41 @@ export default function Jobs() {
 
   const applyForJob = async (jobId) => {
     try {
-      await api.post(`/jobs/${jobId}/apply`, { coverLetter });
+      const formData = new FormData();
+      formData.append('coverLetter', coverLetter);
+      if (resumeFile) formData.append('resume', resumeFile);
+      await api.post(`/jobs/${jobId}/apply`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
       setShowApply(null);
       setCoverLetter('');
+      setResumeFile(null);
       fetchJobs();
       fetchMyApps();
     } catch {}
+  };
+
+  const viewApplicants = async (job) => {
+    setApplicantsLoading(true);
+    setShowApplicants({ jobTitle: job.title, applications: [] });
+    try {
+      const { data } = await api.get(`/jobs/${job._id}`);
+      setShowApplicants({ jobTitle: data.title, applications: data.applications || [] });
+    } catch {}
+    setApplicantsLoading(false);
+  };
+
+  const deleteJob = async (jobId) => {
+    if (!window.confirm('Are you sure you want to delete this job posting? This cannot be undone.')) return;
+    try {
+      await api.delete(`/jobs/${jobId}`);
+      fetchJobs();
+    } catch (err) {
+      console.error('Failed to delete job', err);
+    }
+  };
+
+  const isMyJob = (job) => {
+    const posterId = job.postedBy?._id || job.postedBy;
+    return posterId?.toString() === user?._id?.toString();
   };
 
   const hasApplied = (job) => job.applications?.some(a => a.applicant === user?._id || a.applicant?._id === user?._id);
@@ -55,7 +91,7 @@ export default function Jobs() {
     <div className="fade-in">
       <div className="page-header">
         <div>
-          <h1>Jobs & Internships</h1>
+          <h1>Jobs &amp; Internships</h1>
           <p>Find opportunities posted by alumni and industry partners</p>
         </div>
         {(user?.role === 'alumni' || user?.role === 'admin') && (
@@ -111,10 +147,22 @@ export default function Jobs() {
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                   {job.applications?.length || 0} applicants • Posted by {job.postedBy?.name}
                 </span>
-                {user?.role === 'student' && !hasApplied(job) && (
-                  <button className="btn btn-primary btn-sm" onClick={() => setShowApply(job._id)}>Apply</button>
-                )}
-                {hasApplied(job) && <span className="badge badge-success">Applied</span>}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {isMyJob(job) && (
+                    <>
+                      <button className="btn btn-secondary btn-sm" onClick={() => viewApplicants(job)}>
+                        <Users size={14} /> View Applicants
+                      </button>
+                      <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }} onClick={() => deleteJob(job._id)}>
+                        <Trash2 size={14} /> Delete
+                      </button>
+                    </>
+                  )}
+                  {user?.role === 'student' && !hasApplied(job) && (
+                    <button className="btn btn-primary btn-sm" onClick={() => setShowApply(job._id)}>Apply</button>
+                  )}
+                  {hasApplied(job) && <span className="badge badge-success">Applied</span>}
+                </div>
               </div>
             </div>
           ))}
@@ -150,15 +198,94 @@ export default function Jobs() {
 
       {/* Apply Modal */}
       {showApply && (
-        <div className="modal-overlay" onClick={() => setShowApply(null)}>
+        <div className="modal-overlay" onClick={() => { setShowApply(null); setResumeFile(null); }}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h3>Apply for Position</h3><button className="btn btn-ghost" onClick={() => setShowApply(null)}><X size={20} /></button></div>
+            <div className="modal-header"><h3>Apply for Position</h3><button className="btn btn-ghost" onClick={() => { setShowApply(null); setResumeFile(null); }}><X size={20} /></button></div>
             <div className="modal-body">
-              <div className="form-group"><label className="form-label">Cover Letter (optional)</label><textarea className="form-textarea" placeholder="Tell them why you're a great fit..." value={coverLetter} onChange={e => setCoverLetter(e.target.value)} /></div>
+              <div className="form-group">
+                <label className="form-label">Cover Letter (optional)</label>
+                <textarea className="form-textarea" placeholder="Tell them why you're a great fit..." value={coverLetter} onChange={e => setCoverLetter(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Upload CV / Resume (optional)</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="form-input"
+                  style={{ padding: '8px' }}
+                  onChange={e => setResumeFile(e.target.files[0] || null)}
+                />
+                <small style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Accepted formats: PDF, DOC, DOCX (max 10MB)</small>
+              </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowApply(null)}>Cancel</button>
+              <button className="btn btn-secondary" onClick={() => { setShowApply(null); setResumeFile(null); }}>Cancel</button>
               <button className="btn btn-primary" onClick={() => applyForJob(showApply)}><Send size={14} /> Submit Application</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Applicants Modal */}
+      {showApplicants && (
+        <div className="modal-overlay" onClick={() => setShowApplicants(null)}>
+          <div className="modal" style={{ maxWidth: '700px', width: '95%' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3><Users size={18} style={{ display: 'inline', marginRight: '8px' }} />Applicants for "{showApplicants.jobTitle}"</h3>
+              <button className="btn btn-ghost" onClick={() => setShowApplicants(null)}><X size={20} /></button>
+            </div>
+            <div className="modal-body">
+              {applicantsLoading ? (
+                <div className="loading-spinner" />
+              ) : showApplicants.applications.length === 0 ? (
+                <div className="empty-state" style={{ padding: '32px 0' }}>
+                  <Users size={40} />
+                  <h3>No applicants yet</h3>
+                  <p>Applications will appear here once students apply.</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {showApplicants.applications.map((app, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: '10px', padding: '16px', background: 'var(--bg-secondary)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {app.applicant?.profilePhoto ? (
+                            <img src={API_BASE_URL + app.applicant.profilePhoto} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold' }}>
+                              {app.applicant?.name?.[0] || '?'}
+                            </div>
+                          )}
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{app.applicant?.name || 'Unknown'}</div>
+                            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{app.applicant?.email || ''}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className={`badge ${app.status === 'pending' ? 'badge-warning' : app.status === 'accepted' ? 'badge-success' : 'badge-info'}`}>{app.status}</span>
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(app.appliedAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      {app.coverLetter && (
+                        <div style={{ marginTop: '12px', fontSize: '14px', color: 'var(--text-muted)', background: 'var(--bg-primary)', borderRadius: '6px', padding: '10px' }}>
+                          <strong style={{ color: 'var(--text-primary)' }}>Cover Letter:</strong>
+                          <p style={{ marginTop: '4px', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{app.coverLetter}</p>
+                        </div>
+                      )}
+                      {app.resume && (
+                        <div style={{ marginTop: '10px' }}>
+                          <a href={API_BASE_URL + app.resume} target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <FileText size={14} /> View CV
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowApplicants(null)}>Close</button>
             </div>
           </div>
         </div>
